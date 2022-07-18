@@ -21,7 +21,7 @@ bool TCPHandler::INIT()
 	auto client = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 	if (client == INVALID_SOCKET)
 	{
-		log("[Redirector][TCPHandler::INIT] Create socket failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][TCPHandler::INIT] Create socket failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
@@ -29,7 +29,7 @@ bool TCPHandler::INIT()
 		int v6only = 0;
 		if (setsockopt(client, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&v6only, sizeof(v6only)) == SOCKET_ERROR)
 		{
-			log("[Redirector][TCPHandler::INIT] Set socket option failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][TCPHandler::INIT] Set socket option failed: %d\n", WSAGetLastError());
 
 			closesocket(client);
 			return false;
@@ -42,7 +42,7 @@ bool TCPHandler::INIT()
 
 		if (bind(client, (PSOCKADDR)&addr, sizeof(SOCKADDR_IN6)) == SOCKET_ERROR)
 		{
-			log("[Redirector][TCPHandler::INIT] Bind socket failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][TCPHandler::INIT] Bind socket failed: %d\n", WSAGetLastError());
 
 			closesocket(client);
 			return false;
@@ -51,7 +51,7 @@ bool TCPHandler::INIT()
 	
 	if (listen(client, 1024) == SOCKET_ERROR)
 	{
-		log("[Redirector][TCPHandler::INIT] Listen socket failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][TCPHandler::INIT] Listen socket failed: %d\n", WSAGetLastError());
 
 		closesocket(client);
 		return false;
@@ -62,7 +62,7 @@ bool TCPHandler::INIT()
 		int addrLength = sizeof(SOCKADDR_IN6);
 		if (getsockname(client, (PSOCKADDR)&addr, &addrLength) == SOCKET_ERROR)
 		{
-			log("[Redirector][TCPHandler::INIT] Get listen address failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][TCPHandler::INIT] Get listen address failed: %d\n", WSAGetLastError());
 
 			closesocket(client);
 			return false;
@@ -123,7 +123,7 @@ void TCPHandler::Accept()
 			if (lasterr == 10004)
 				return;
 
-			log("[Redirector][TCPHandler::Accept] Accept client failed: %d\n", lasterr);
+			log(L"[Redirector][TCPHandler::Accept] Accept client failed: %d\n", lasterr);
 			return;
 		}
 
@@ -157,7 +157,7 @@ void TCPHandler::Handle(SOCKET client)
 		return;
 	}
 
-	auto target = tcpContext[id];
+	SOCKADDR_IN6 target = tcpContext[id];
 	tcpLock.unlock();
 
 	auto remote = new SocksHelper::TCP();

@@ -5,6 +5,7 @@
 
 extern bool filterLoopback;
 extern bool filterIntranet;
+extern bool filterSelf;
 extern bool filterParent;
 extern bool filterICMP;
 extern bool filterTCP;
@@ -22,6 +23,8 @@ extern wstring tgtHost;
 extern wstring tgtPort;
 extern string tgtUsername;
 extern string tgtPassword;
+
+extern bool enableLog;
 
 extern vector<wstring> bypassList;
 extern vector<wstring> handleList;
@@ -68,7 +71,7 @@ extern "C" {
 		auto status = nf_registerDriver(ws2s(value).c_str());
 		if (status != NF_STATUS_SUCCESS)
 		{
-			log("[Redirector][aio_register] nf_registerDriver: %d\n", status);
+			log(L"[Redirector][aio_register] nf_registerDriver: %d\n", status);
 			return FALSE;
 		}
 
@@ -80,7 +83,7 @@ extern "C" {
 		auto status = nf_unRegisterDriver(ws2s(value).c_str());
 		if (status != NF_STATUS_SUCCESS)
 		{
-			log("[Redirector][aio_unregister] nf_unRegisterDriver: %d\n", status);
+			log(L"[Redirector][aio_unregister] nf_unRegisterDriver: %d\n", status);
 			return FALSE;
 		}
 
@@ -96,6 +99,9 @@ extern "C" {
 			break;
 		case AIO_FILTERINTRANET:
 			filterIntranet = (wstring(value).find(L"false") == string::npos);
+			break;
+		case AIO_FILTERSELF:
+			filterSelf = (wstring(value).find(L"false") == string::npos);
 			break;
 		case AIO_FILTERPARENT:
 			filterParent = (wstring(value).find(L"false") == string::npos);
@@ -166,7 +172,7 @@ extern "C" {
 			handleList.emplace_back(value);
 			break;
 		case AIO_PRINTLOG:
-			enable_log((wstring(value).find(L"false") == string::npos));
+			enableLog = (wstring(value).find(L"false") == string::npos);
 		default:
 			return FALSE;
 		}
@@ -179,20 +185,20 @@ extern "C" {
 		WSADATA data;
 		if (WSAStartup(MAKEWORD(2, 2), &data) != NO_ERROR)
 		{
-			log("[Redirector][aio_init] WSAStartup != NO_ERROR");
+			log(L"[Redirector][aio_init] WSAStartup != NO_ERROR");
 			return FALSE;
 		}
 
 		nf_adjustProcessPriviledges();
 		if (!eh_init())
 		{
-			log("[Redirector][aio_init] !eh_init");
+			log(L"[Redirector][aio_init] !eh_init");
 			return FALSE;
 		}
 
 		if (nf_init("netfilter2", &EventHandler) != NF_STATUS_SUCCESS)
 		{
-			log("[Redirector][aio_init] nf_init != NF_STATUS_SUCCESS");
+			log(L"[Redirector][aio_init] nf_init != NF_STATUS_SUCCESS");
 			return FALSE;
 		}
 

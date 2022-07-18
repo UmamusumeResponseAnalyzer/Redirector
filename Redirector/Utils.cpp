@@ -1,6 +1,6 @@
 #include "Utils.h"
 
-bool log_enabled = false;
+extern bool enableLog;
 string ws2s(wstring str)
 {
 	auto length = WideCharToMultiByte(CP_ACP, 0, str.c_str(), static_cast<int>(str.length()), NULL, 0, NULL, NULL);
@@ -27,13 +27,10 @@ wstring s2ws(string str)
 	return data;
 }
 
-void enable_log(bool option) {
-	log_enabled = option;
-}
-void log(const char* fmt, ...) {
-	if (!log_enabled) return;
+void log(const wchar_t* fmt, ...) {
+	if (!enableLog) return;
 	va_list args;
 	va_start(args, fmt);
-	vprintf(fmt, args);
+	vwprintf(fmt, args);
 	va_end(args);
 }

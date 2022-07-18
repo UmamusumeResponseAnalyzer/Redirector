@@ -5,6 +5,5 @@
 
 string ws2s(wstring str);
 wstring s2ws(string str);
-void enable_log(bool option);
-void log(const char* fmt, ...);
+void log(const wchar_t* fmt, ...);
 #endif

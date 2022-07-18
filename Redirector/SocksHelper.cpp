@@ -12,7 +12,7 @@ SOCKET SocksHelper::Connect()
 	auto client = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 	if (client == INVALID_SOCKET)
 	{
-		log("[Redirector][SocksHelper::Connect] Create socket failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::Connect] Create socket failed: %d\n", WSAGetLastError());
 		return INVALID_SOCKET;
 	}
 
@@ -20,7 +20,7 @@ SOCKET SocksHelper::Connect()
 		int v6only = 0;
 		if (setsockopt(client, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&v6only, sizeof(v6only)) == SOCKET_ERROR)
 		{
-			log("[Redirector][SocksHelper::Connect] Set socket option failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::Connect] Set socket option failed: %d\n", WSAGetLastError());
 
 			closesocket(client);
 			return INVALID_SOCKET;
@@ -32,7 +32,7 @@ SOCKET SocksHelper::Connect()
 
 	if (!WSAConnectByNameW(client, (LPWSTR)tgtHost.c_str(), (LPWSTR)tgtPort.c_str(), NULL, NULL, NULL, NULL, &timeout, NULL))
 	{
-		log("[Redirector][SocksHelper::Connect] Connect to remote server failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::Connect] Connect to remote server failed: %d\n", WSAGetLastError());
 
 		closesocket(client);
 		return INVALID_SOCKET;
@@ -60,14 +60,14 @@ bool SocksHelper::Handshake(SOCKET client)
 	buffer[3] = 0x02;
 	if (send(client, buffer, 4, 0) != 4)
 	{
-		log("[Redirector][SocksHelper::Handshake] Send client hello failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::Handshake] Send client hello failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
 	/* Server Choice */
 	if (recv(client, buffer, 2, 0) != 2)
 	{
-		log("[Redirector][SocksHelper::Handshake] Receive server choice failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::Handshake] Receive server choice failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
@@ -99,20 +99,20 @@ bool SocksHelper::Handshake(SOCKET client)
 		auto length = 1 + 1 + ulength + 1 + plength;
 		if (send(client, buffer, length, 0) != length)
 		{
-			log("[Redirector][SocksHelper::Handshake] Send authentication request failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::Handshake] Send authentication request failed: %d\n", WSAGetLastError());
 			return false;
 		}
 
 		/* Server Response */
 		if (recv(client, buffer, 2, 0) != 2)
 		{
-			log("[Redirector][SocksHelper::Handshake] Receive server response failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::Handshake] Receive server response failed: %d\n", WSAGetLastError());
 			return false;
 		}
 
 		if (buffer[1] != 0x00)
 		{
-			log("[Redirector][SocksHelper::Handshake] Authentication failed");
+			log(L"[Redirector][SocksHelper::Handshake] Authentication failed");
 			return false;
 		}
 	}
@@ -129,7 +129,7 @@ bool SocksHelper::SplitAddr(SOCKET client, PSOCKADDR_IN6 addr)
 	char addrType;
 	if (recv(client, (char*)&addrType, 1, 0) != 1)
 	{
-		log("[Redirector][SocksHelper::SplitAddr] Read address type failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::SplitAddr] Read address type failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
@@ -140,13 +140,13 @@ bool SocksHelper::SplitAddr(SOCKET client, PSOCKADDR_IN6 addr)
 
 		if (recv(client, (char*)&ipv4->sin_addr, 4, 0) != 4)
 		{
-			log("[Redirector][SocksHelper::SplitAddr] Read IPv4 address failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::SplitAddr] Read IPv4 address failed: %d\n", WSAGetLastError());
 			return false;
 		}
 
 		if (recv(client, (char*)&ipv4->sin_port, 2, 0) != 2)
 		{
-			log("[Redirector][SocksHelper::SplitAddr] Read IPv4 port failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::SplitAddr] Read IPv4 port failed: %d\n", WSAGetLastError());
 			return false;
 		}
 	}
@@ -156,19 +156,19 @@ bool SocksHelper::SplitAddr(SOCKET client, PSOCKADDR_IN6 addr)
 
 		if (recv(client, (char*)&addr->sin6_addr, 16, 0) != 16)
 		{
-			log("[Redirector][SocksHelper::SplitAddr] Read IPv6 address failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::SplitAddr] Read IPv6 address failed: %d\n", WSAGetLastError());
 			return false;
 		}
 
 		if (recv(client, (char*)&addr->sin6_port, 2, 0) != 2)
 		{
-			log("[Redirector][SocksHelper::SplitAddr] Read IPv6 port failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::SplitAddr] Read IPv6 port failed: %d\n", WSAGetLastError());
 			return false;
 		}
 	}
 	else
 	{
-		log("[Redirector][SocksHelper::SplitAddr] Unsupported address family: %d\n", addrType);
+		log(L"[Redirector][SocksHelper::SplitAddr] Unsupported address family: %d\n", addrType);
 		return false;
 	}
 
@@ -209,7 +209,7 @@ bool SocksHelper::TCP::Connect(PSOCKADDR_IN6 target)
 
 		if (send(this->tcpSocket, buffer, 10, 0) != 10)
 		{
-			log("[Redirector][SocksHelper::TCP::Connect] Send connect request failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::TCP::Connect] Send connect request failed: %d\n", WSAGetLastError());
 			return false;
 		}
 	}
@@ -227,7 +227,7 @@ bool SocksHelper::TCP::Connect(PSOCKADDR_IN6 target)
 
 		if (send(this->tcpSocket, buffer, sizeof(buffer), 0) != sizeof(buffer))
 		{
-			log("[Redirector][SocksHelper::TCP::Connect] Send connect request failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::TCP::Connect] Send connect request failed: %d\n", WSAGetLastError());
 			return false;
 		}
 	}
@@ -236,7 +236,7 @@ bool SocksHelper::TCP::Connect(PSOCKADDR_IN6 target)
 	char buffer[3];
 	if (recv(this->tcpSocket, buffer, 3, 0) != 3)
 	{
-		log("[Redirector][SocksHelper::TCP::Connect] Receive server response failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::TCP::Connect] Receive server response failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
@@ -313,19 +313,19 @@ bool SocksHelper::UDP::Associate()
 
 	if (send(this->tcpSocket, buffer, 10, 0) != 10)
 	{
-		log("[Redirector][SocksHelper::UDP::Associate] Send udp associate request failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::UDP::Associate] Send udp associate request failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
 	if (recv(this->tcpSocket, buffer, 3, 0) != 3)
 	{
-		log("[Redirector][SocksHelper::UDP::Associate] Receive udp associate response failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::UDP::Associate] Receive udp associate response failed: %d\n", WSAGetLastError());
 		return false;
 	}
 
 	if (buffer[1] != 0x00)
 	{
-		log("[Redirector][SocksHelper::UDP::Associate] UDP associate failed: %d\n", buffer[1]);
+		log(L"[Redirector][SocksHelper::UDP::Associate] UDP associate failed: %d\n", buffer[1]);
 		return false;
 	}
 
@@ -339,7 +339,7 @@ bool SocksHelper::UDP::CreateUDP()
 		this->udpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 		if (this->udpSocket == INVALID_SOCKET)
 		{
-			log("[Redirector][SocksHelper::UDP::CreateUDP] Create IPv4 socket failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::UDP::CreateUDP] Create IPv4 socket failed: %d\n", WSAGetLastError());
 			return false;
 		}
 
@@ -349,7 +349,7 @@ bool SocksHelper::UDP::CreateUDP()
 
 		if (bind(this->udpSocket, (PSOCKADDR)&bindaddr, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
 		{
-			log("[Redirector][SocksHelper::UDP::CreateUDP] Listen IPv4 socket failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::UDP::CreateUDP] Listen IPv4 socket failed: %d\n", WSAGetLastError());
 			return false;
 		}
 	}
@@ -358,7 +358,7 @@ bool SocksHelper::UDP::CreateUDP()
 		this->udpSocket = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 		if (this->udpSocket == INVALID_SOCKET)
 		{
-			log("[Redirector][SocksHelper::UDP::CreateUDP] Create IPv6 socket failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::UDP::CreateUDP] Create IPv6 socket failed: %d\n", WSAGetLastError());
 			return false;
 		}
 
@@ -368,7 +368,7 @@ bool SocksHelper::UDP::CreateUDP()
 
 		if (bind(this->udpSocket, (PSOCKADDR)&bindaddr, sizeof(SOCKADDR_IN6)) == SOCKET_ERROR)
 		{
-			log("[Redirector][SocksHelper::UDP::CreateUDP] Listen IPv6 socket failed: %d\n", WSAGetLastError());
+			log(L"[Redirector][SocksHelper::UDP::CreateUDP] Listen IPv6 socket failed: %d\n", WSAGetLastError());
 			return false;
 		}
 	}
@@ -408,7 +408,7 @@ int SocksHelper::UDP::Send(PSOCKADDR_IN6 target, const char* buffer, int length)
 	{
 		delete[] data;
 
-		log("[Redirector][SocksHelper::UDP::Send] Send packet failed: %d\n", WSAGetLastError());
+		log(L"[Redirector][SocksHelper::UDP::Send] Send packet failed: %d\n", WSAGetLastError());
 		return SOCKET_ERROR;
 	}
 

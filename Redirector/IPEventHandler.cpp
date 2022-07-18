@@ -81,7 +81,7 @@ void ipSend(const char* buffer, int length, PNF_IP_PACKET_OPTIONS options)
 
 	if (icmping > 0)
 		this_thread::sleep_for(chrono::milliseconds(icmping));
-	log("[Redirector][IPEventHandler][ipSend] Fake ICMP response for %d.%d.%d.%d\n", data[12], data[13], data[14], data[15]);
+	log(L"[Redirector][IPEventHandler][ipSend] Fake ICMP response for %d.%d.%d.%d\n", data[12], data[13], data[14], data[15]);
 
 	nf_ipPostReceive((char*)data, length, options);
 	delete[] data;

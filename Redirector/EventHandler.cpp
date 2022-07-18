@@ -11,6 +11,8 @@ extern bool filterDNS;
 
 extern bool dnsOnly;
 
+extern bool filterSelf;
+
 extern vector<wstring> bypassList;
 extern vector<wstring> handleList;
 
@@ -179,7 +181,7 @@ void threadEnd()
 
 void tcpConnectRequest(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 {
-	if (CurrentID == info->processId)
+	if (CurrentID == info->processId && !filterSelf)
 	{
 		nf_tcpDisableFiltering(id);
 		return;
@@ -190,7 +192,7 @@ void tcpConnectRequest(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 		nf_tcpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][tcpConnectRequest][" << id << "][" << info->processId << "][!filterTCP] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][!filterTCP] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][!filterTCP] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
@@ -199,7 +201,7 @@ void tcpConnectRequest(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 		nf_tcpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][tcpConnectRequest][" << id << "][" << info->processId << "][checkBypassName] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][checkBypassName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][checkBypassName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
@@ -208,7 +210,7 @@ void tcpConnectRequest(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 		nf_tcpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][tcpConnectRequest][" << id << "][" << info->processId << "][!checkHandleName] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][!checkHandleName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][!checkHandleName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
@@ -217,7 +219,7 @@ void tcpConnectRequest(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 		nf_tcpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][tcpConnectRequest][" << id << "][" << info->processId << "][!IPv4 && !IPv6] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][!IPv4 && !IPv6] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][tcpConnectRequest][%llu][%1u][!IPv4 && !IPv6] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
@@ -244,13 +246,13 @@ void tcpConnectRequest(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 
 	TCPHandler::CreateHandler(client, remote);
 	//wcout << "[Redirector][EventHandler][tcpConnectRequest][" << id << "][" << info->processId << "] " << ConvertIP((PSOCKADDR)&client) << " -> " << ConvertIP((PSOCKADDR)&remote) << endl;
-	log("[Redirector][EventHandler][tcpConnectRequest][%llu][%1u] %s -> %s\n", id, info->processId, ConvertIP((PSOCKADDR)&client).c_str(), ConvertIP((PSOCKADDR)&remote).c_str());
+	log(L"[Redirector][EventHandler][tcpConnectRequest][%llu][%1u] %s -> %s\n", id, info->processId, ConvertIP((PSOCKADDR)&client).c_str(), ConvertIP((PSOCKADDR)&remote).c_str());
 }
 
 void tcpConnected(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 {
 	//wcout << "[Redirector][EventHandler][tcpConnected][" << id << "][" << info->processId << "][" << ConvertIP((PSOCKADDR)info->remoteAddress) << "] " << GetProcessName(info->processId) << endl;
-	log("[Redirector][EventHandler][tcpConnected][%llu][%1u][%s] %s\n", id, info->processId, ConvertIP((PSOCKADDR)info->remoteAddress).c_str(), GetProcessName(info->processId).c_str());
+	log(L"[Redirector][EventHandler][tcpConnected][%llu][%1u][%s] %s\n", id, info->processId, ConvertIP((PSOCKADDR)info->remoteAddress).c_str(), GetProcessName(info->processId).c_str());
 }
 
 void tcpCanSend(ENDPOINT_ID id)
@@ -284,12 +286,12 @@ void tcpClosed(ENDPOINT_ID id, PNF_TCP_CONN_INFO info)
 
 	TCPHandler::DeleteHandler(client);
 
-	log("[Redirector][EventHandler][tcpClosed][%llu][%lu]\n", id, info->processId);
+	log(L"[Redirector][EventHandler][tcpClosed][%llu][%lu]\n", id, info->processId);
 }
 
 void udpCreated(ENDPOINT_ID id, PNF_UDP_CONN_INFO info)
 {
-	if (CurrentID == info->processId)
+	if (CurrentID == info->processId && !filterSelf)
 	{
 		nf_udpDisableFiltering(id);
 		return;
@@ -300,7 +302,7 @@ void udpCreated(ENDPOINT_ID id, PNF_UDP_CONN_INFO info)
 		if (!filterDNS) nf_udpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][udpCreated][" << id << "][" << info->processId << "][!filterUDP] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][udpCreated][%llu][%1u][!filterUDP] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][udpCreated][%llu][%1u][!filterUDP] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
@@ -309,7 +311,7 @@ void udpCreated(ENDPOINT_ID id, PNF_UDP_CONN_INFO info)
 		if (dnsOnly) nf_udpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][udpCreated][" << id << "][" << info->processId << "][checkBypassName] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][udpCreated][%llu][%1u][checkBypassName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][udpCreated][%llu][%1u][checkBypassName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
@@ -318,12 +320,12 @@ void udpCreated(ENDPOINT_ID id, PNF_UDP_CONN_INFO info)
 		if (dnsOnly) nf_udpDisableFiltering(id);
 
 		//wcout << "[Redirector][EventHandler][udpCreated][" << id << "][" << info->processId << "][!checkHandleName] " << GetProcessName(info->processId) << endl;
-		log("[Redirector][EventHandler][udpCreated][%llu][%1u][!checkHandleName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+		log(L"[Redirector][EventHandler][udpCreated][%llu][%1u][!checkHandleName] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 		return;
 	}
 
 	//wcout << "[Redirector][EventHandler][udpCreated][" << id << "][" << info->processId << "] " << GetProcessName(info->processId) << endl;
-	log("[Redirector][EventHandler][udpCreated][%llu][%1u] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
+	log(L"[Redirector][EventHandler][udpCreated][%llu][%1u] %s\n", id, info->processId, GetProcessName(info->processId).c_str());
 
 	lock_guard<mutex> lg(udpContextLock);
 	udpContext[id] = new SocksHelper::UDP();
@@ -349,7 +351,7 @@ void udpSend(ENDPOINT_ID id, const unsigned char* target, const char* buffer, in
 			nf_udpPostSend(id, target, buffer, length, options);
 
 			//wcout << "[Redirector][EventHandler][udpSend][" << id << "] B DNS to " << ConvertIP((PSOCKADDR)target) << endl;
-			log("[Redirector][EventHandler][udpSend][%llu] B DNS to %s\n", id, ConvertIP((PSOCKADDR)target).c_str());
+			log(L"[Redirector][EventHandler][udpSend][%llu] B DNS to %s\n", id, ConvertIP((PSOCKADDR)target).c_str());
 			return;
 		}
 		else
@@ -358,7 +360,7 @@ void udpSend(ENDPOINT_ID id, const unsigned char* target, const char* buffer, in
 			DNSHandler::CreateHandler(id, (PSOCKADDR_IN6)target, buffer, length, options);
 
 			//wcout << "[Redirector][EventHandler][udpSend][" << id << "] H DNS to " << ConvertIP((PSOCKADDR)target) << endl;
-			log("[Redirector][EventHandler][udpSend][%llu] H DNS to %s\n", id, ConvertIP((PSOCKADDR)target).c_str());
+			log(L"[Redirector][EventHandler][udpSend][%llu] H DNS to %s\n", id, ConvertIP((PSOCKADDR)target).c_str());
 			return;
 		}
 	}
@@ -406,7 +408,7 @@ void udpClosed(ENDPOINT_ID id, PNF_UDP_CONN_INFO info)
 {
 	UNREFERENCED_PARAMETER(info);
 
-	log("[Redirector][EventHandler][udpClosed][%llu]\n", id);
+	log(L"[Redirector][EventHandler][udpClosed][%llu]\n", id);
 
 	lock_guard<mutex> lg(udpContextLock);
 	if (udpContext.find(id) != udpContext.end())

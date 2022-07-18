@@ -2,6 +2,7 @@
 
 bool filterLoopback = false;
 bool filterIntranet = false;
+bool filterSelf = false;
 bool filterParent = false;
 bool filterICMP = true;
 bool filterTCP = true;
@@ -19,6 +20,8 @@ wstring tgtHost = L"127.0.0.1";
 wstring tgtPort = L"1080";
 string tgtUsername = "";
 string tgtPassword = "";
+
+bool enableLog = false;
 
 vector<wstring> bypassList;
 vector<wstring> handleList;
