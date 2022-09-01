@@ -106,6 +106,7 @@
     <ClCompile Include="Based.cpp" />
     <ClCompile Include="DNSHandler.cpp" />
     <ClCompile Include="EventHandler.cpp" />
+    <ClCompile Include="HTTPEventHandler.cpp" />
     <ClCompile Include="IPEventHandler.cpp" />
     <ClCompile Include="Redirector.cpp" />
     <ClCompile Include="SocksHelper.cpp" />

@@ -20,6 +20,7 @@ wstring tgtHost = L"127.0.0.1";
 wstring tgtPort = L"1080";
 string tgtUsername = "";
 string tgtPassword = "";
+int proxyPid = 0;
 
 bool enableLog = false;
 

@@ -35,6 +35,9 @@
     <ClCompile Include="DNSHandler.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="HTTPEventHandler.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EventHandler.h">

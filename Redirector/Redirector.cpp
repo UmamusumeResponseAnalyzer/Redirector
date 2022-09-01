@@ -23,6 +23,7 @@ extern wstring tgtHost;
 extern wstring tgtPort;
 extern string tgtUsername;
 extern string tgtPassword;
+extern int proxyPid;
 
 extern bool enableLog;
 
@@ -144,6 +145,9 @@ extern "C" {
 			break;
 		case AIO_TGTPASS:
 			tgtPassword = ws2s(value);
+			break;
+		case HT_PROXYPID:
+			proxyPid = atoi(ws2s(value).c_str());
 			break;
 		case AIO_CLRNAME:
 			bypassList.clear();
